@@ -4,6 +4,7 @@ import tkinter as tk
 from enum import Enum
 import time
 from Inputs import set_dragging, is_dragging
+from win32api import GetSystemMetrics
 
 class State(Enum):
     IDLE = 0   
@@ -72,23 +73,34 @@ def update_window(frame):
     window.geometry('200x200+'+str(x)+'+'+str(y))
     label.configure(image=frame)
 
+acceleration = 0
+
 def update():
     
-    global state,cycle,x,y,state_timer
+    global state,cycle,x,y,state_timer,acceleration
 
     cursor_x, cursor_y = pyautogui.position()
     
+    """
+    acceleration += 10
 
+    if y >= GetSystemMetrics(1)-300:
+        acceleration = 0
+        y = GetSystemMetrics(1)-300
+        
+    y += acceleration
+    """
+    
     match state:
         case State.DRAGGING:
             if not is_dragging:
                 change_state(State.IDLE)
             # drag animation
-            x = cursor_x - 50
-            y = cursor_y - 50
+            x = cursor_x-100
+            y = cursor_y-100
             
-            cycle = gif_work(cycle,sleep)
-            frame = sleep[cycle]
+            cycle = gif_work(cycle,idle)
+            frame = idle[cycle]
             update_window(frame)    
         case State.IDLE:
             state_timer += 1
@@ -128,15 +140,15 @@ def update():
                 update_window(frame)
                 
         case State.LOVEING:
-            state_timer += 1
-            
-            cycle = gif_work(cycle,idle_to_sleep)
-            frame = idle_to_sleep[cycle]
+                       
+            cycle = gif_work(cycle,love)
+            if(cycle == 0):
+                change_state(State.IDLE)
+            frame = love[cycle]
             time.sleep(0.1)
             update_window(frame)
             
-            if(state_timer >10):
-                change_state(State.IDLE)
+            
 
     
     window.after(50,update)
@@ -146,12 +158,13 @@ def update():
 window = tk.Tk()
 
 #call buddy's action gif
-idle = [tk.PhotoImage(file=impath+'Bunidle.gif',format = 'gif -index %i' %(i)) for i in range(2)]#idle gif
-idle_to_sleep = [tk.PhotoImage(file=impath+'idle_to_sleep.gif',format = 'gif -index %i' %(i)) for i in range(8)]#idle to sleep gif
-sleep = [tk.PhotoImage(file=impath+'sleep.gif',format = 'gif -index %i' %(i)) for i in range(3)]#sleep gif
-sleep_to_idle = [tk.PhotoImage(file=impath+'sleep_to_idle.gif',format = 'gif -index %i' %(i)) for i in range(8)]#sleep to idle gif
-walk_positive = [tk.PhotoImage(file=impath+'walking_positive.gif',format = 'gif -index %i' %(i)) for i in range(8)]#walk to left gif
-walk_negative = [tk.PhotoImage(file=impath+'walking_negative.gif',format = 'gif -index %i' %(i)) for i in range(8)]#walk to right gif
+idle = [tk.PhotoImage(file=impath+'Bunidle.gif',format = 'gif -index %i' %(i)) for i in range(2)]
+idle_to_sleep = [tk.PhotoImage(file=impath+'idle_to_sleep.gif',format = 'gif -index %i' %(i)) for i in range(8)]
+sleep = [tk.PhotoImage(file=impath+'BunSleep.gif',format = 'gif -index %i' %(i)) for i in range(4)]
+sleep_to_idle = [tk.PhotoImage(file=impath+'BunWake.gif',format = 'gif -index %i' %(i)) for i in range(4)]
+walk_positive = [tk.PhotoImage(file=impath+'BunWalkLeft.gif',format = 'gif -index %i' %(i)) for i in range(5)]
+walk_negative = [tk.PhotoImage(file=impath+'BunWalkRight.gif',format = 'gif -index %i' %(i)) for i in range(5)]
+love = [tk.PhotoImage(file=impath+'BunLove.gif',format = 'gif -index %i' %(i)) for i in range(9)]
 
 #window configuration
 window.config(highlightbackground='black')
