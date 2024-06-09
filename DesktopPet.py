@@ -4,6 +4,7 @@ import tkinter as tk
 from enum import Enum
 import time
 from win32api import GetSystemMetrics
+import sys
 
 class State(Enum):
     IDLE = 0   
@@ -274,7 +275,7 @@ r_menu.add_checkbutton(label ="Always on top",onvalue=True,offvalue=False,variab
 r_menu.add_command(label ="Set floor here", command = set_floor_here)
 r_menu.add_command(label ="Surprise", command = start_celebration)
 r_menu.add_separator()
-r_menu.add_command(label ="Bye Bye", command = quit)
+r_menu.add_command(label ="Bye Bye", command = sys.exit)
 
 
 #loop the program
