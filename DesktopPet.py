@@ -60,7 +60,11 @@ def on_unclick(event):
 
     
 def change_state(new_state):
-    global state,state_timer,fall_speed
+    global state,state_timer,fall_speed,long_sleep
+    
+    if new_state != State.SLEEP and long_sleep.get():
+        return
+    
     state = new_state
     state_timer = 0
     fall_speed = 0
@@ -237,7 +241,13 @@ def set_floor_here():
     floor_level = y
 
 def set_always_on_top():
-    window.wm_attributes('-topmost',always_on_top.get())  
+    window.wm_attributes('-topmost',always_on_top.get()) 
+    
+def set_long_sleep():
+    if long_sleep.get():
+        change_state(State.SLEEP) 
+    else:
+        change_state(State.WAKEUP)
     
 window = tk.Tk()
 
@@ -266,6 +276,7 @@ label.pack()
 
 gravity_enabled = tk.BooleanVar()
 always_on_top = tk.BooleanVar(value= True)
+long_sleep = tk.BooleanVar()
 
 set_always_on_top()
 
@@ -273,6 +284,7 @@ r_menu = tk.Menu(window, tearoff = 0)
 r_menu.add_checkbutton(label ="Gravity",onvalue=True,offvalue=False,variable=gravity_enabled)
 r_menu.add_checkbutton(label ="Always on top",onvalue=True,offvalue=False,variable=always_on_top,command=set_always_on_top)
 r_menu.add_command(label ="Set floor here", command = set_floor_here)
+r_menu.add_checkbutton(label ="Winter sleep",onvalue=True,offvalue=False,variable=long_sleep,command=set_long_sleep)
 r_menu.add_command(label ="Surprise", command = start_celebration)
 r_menu.add_separator()
 r_menu.add_command(label ="Bye Bye", command = sys.exit)
