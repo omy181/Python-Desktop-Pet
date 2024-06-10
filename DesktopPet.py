@@ -4,6 +4,7 @@ import tkinter as tk
 from enum import Enum
 import time
 from win32api import GetSystemMetrics
+from win32gui import GetForegroundWindow, GetWindowText
 import sys
 from PIL import Image, ImageTk
 
@@ -18,6 +19,8 @@ class State(Enum):
     CELEBRATION = 7
     HUG = 8
     HELP = 9
+    WATCHING = 10
+    CODER = 11
 
 floor_level = GetSystemMetrics(1)-270
 
@@ -65,6 +68,9 @@ def change_state(new_state):
     state = new_state
     state_timer = 0
     fall_speed = 0
+    
+def get_res_center_x():
+    return GetSystemMetrics(0)/2
 
 def distance(cursor_x,x):
     return abs(cursor_x - x)
@@ -95,6 +101,11 @@ def gravity():
     else:
         fall_speed = 0
         y = floor_level 
+        
+def get_active_window_title():
+    window = GetForegroundWindow()
+    title = GetWindowText(window)
+    return title
 
 def gif_work(cycle,frames):
     if cycle < len(frames) -1:
@@ -114,6 +125,18 @@ def update_frame(animation):
 fall_speed = 0
 sleep_time = 0
 
+def check_if_watching():
+    title = get_active_window_title()  
+    if "YouTube" in title or "Netflix" in title:
+        return True
+    return False
+
+def check_if_coding():
+    title = get_active_window_title()  
+    if "Visual Studio" in title:
+        return True
+    return False
+
 def update():
     global state,cycle,x,y,state_timer,gravity_enabled,fall_speed,is_dragging,hold_timer,is_clicked,sleep_time
     
@@ -126,8 +149,45 @@ def update():
     else:
         hold_timer = 0
         is_dragging = False
+        
+        
+    if int(time.time()%60)%15 < 1 :
+        if check_if_watching() :
+           change_state(State.WATCHING)
+        elif check_if_coding() :
+           change_state(State.CODER)
+
+       
+           
     
     match state:
+        case State.CODER:
+            state_timer += 1
+            
+            update_frame(coder)      
+
+            time.sleep(0.4) 
+            
+            if(state_timer > 5):
+                if not check_if_coding():
+                   change_state(State.IDLE) 
+                state_timer = 0
+                
+        case State.WATCHING:
+            state_timer += 1
+            
+            if x < get_res_center_x():
+                update_frame(watching_left)
+            else:
+                update_frame(watching_right)        
+
+            time.sleep(0.4) 
+            
+            if(state_timer > 5):
+                if not check_if_watching():
+                   change_state(State.IDLE) 
+                state_timer = 0
+            
         case State.HELP:
             lcycle = gif_work(cycle,help)
                         
@@ -167,7 +227,7 @@ def update():
                 change_state(State.IDLE)
           
             x = cursor_x-100
-            y = cursor_y-20
+            y = cursor_y-50
             time.sleep(0.06)
             update_frame(hold)  
             
@@ -185,10 +245,11 @@ def update():
             
             if(state_timer > 100):
                 
-                random_action =  random.choice([State.SLEEP,State.SLEEP,State.HUG,State.CELEBRATION,State.HELP,State.IDLE,State.IDLE,State.IDLE,State.IDLE])
+                random_action =  random.choice([State.SLEEP,State.SLEEP,State.SLEEP,State.WATCHING,State.WATCHING,State.HUG,State.CELEBRATION,State.HELP,State.IDLE,State.IDLE,State.IDLE,State.IDLE])
                    
                 sleep_time = random.randint(200,400)
                 change_state(random_action)
+
             
         case State.SLEEP:
             state_timer += 1
@@ -284,6 +345,9 @@ love = load_images(impath+'BunLove.gif', 9)
 celebration = load_images(impath+'BunCelebration.gif', 25)
 hug = load_images(impath+'BunHug.gif', 15)
 help = load_images(impath+'BunHelp.gif', 16)
+watching_left = load_images(impath+'BunWatchLeft.gif', 2)
+watching_right = load_images(impath+'BunWatchRight.gif', 2)
+coder = load_images(impath+'BunCoder.gif', 2)
 
 #window configuration
 window.config(highlightbackground='black')
