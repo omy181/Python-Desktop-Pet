@@ -2,4 +2,4 @@
 You can just run the BunBun.exe
 
 # About
-A present project made for my girlfriend
+A desktop emotional support pet project made for my girlfriend
